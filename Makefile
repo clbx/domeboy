@@ -1,9 +1,9 @@
 EXE = domeboy
 SOURCES = main.cpp
 SOURCES += lib/gl3w/GL/glew.c
-SOURCES += lib/imgui/examples/imgui_impl_opengl3.cpp lib/imgui/examples/imgui_impl_glfw.cpp
-SOURCES += lib/imgui/imgui.cpp lib/imgui/imgui_demo.cpp lib/imgui/imgui_draw.cpp lib/imgui/imgui_widgets.cpp
-#SOURCES += lib/imtui/imtui-impl-text.cpp lib/timtui/imtui-impl-ncurses.h
+SOURCES += lib/imgui/backend/imgui_impl_sdl.cpp lib/imgui/backend/imgui_impl_opengl3.cpp 
+SOURCES += lib/imgui/imgui.cpp lib/imgui/imgui_demo.cpp lib/imgui/imgui_draw.cpp lib/imgui/imgui_widgets.cpp lib/imgui/imgui_tables.cpp
+
 
 VPATH = src:bin
 
@@ -12,15 +12,17 @@ BINS = $(addprefix bin/, $(OBJS))
 UNAME_S := $(shell uname -s)
 ARCH := $(shell gcc -dumpmachine)
 
-CXXFLAGS = -Ilib/imgui -Ilib/misc -Ilib/imtui -Ilib/imgui/examples
-CXXFLAGS += -g -lglfw -Wformat -Wno-unknown-pragmas #-lncurses -fno-omit-frame-pointer -fsanitize=thread
+CXXFLAGS = -Ilib/imgui -Ilib/imgui/backends -Ilib
+CXXFLAGS += -g -Wformat -Wno-unknown-pragmas #-lncurses -fno-omit-frame-pointer -fsanitize=thread
 LIBS =
 
 
 ## Using OpenGL loader: gl3w [default]
 # SOURCES += lib/gl3w/GL/gl3w.c
 CXXFLAGS += -Ilib/gl3w
-
+ifeq ($(PLAT), Pi)
+	CXXFLAGS += -lwiringPi
+endif
 
 ifeq ($(UNAME_S), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"
@@ -60,11 +62,7 @@ endif
 	mkdir -p bin
 	$(CXX) $(CXXFLAGS) -c -o bin/$@ $<
 
-%.o:lib/misc/%.cpp
-	mkdir -p bin
-	$(CXX) $(CXXFLAGS) -c -o bin/$@ $<
-
-%.o:lib/imgui/examples/%.cpp
+%.o:lib/imgui/backends/%.cpp
 	mkdir -p bin
 	$(CXX) $(CXXFLAGS) -c -o bin/$@ $<
 
@@ -85,4 +83,4 @@ $(EXE): $(OBJS)
 
 clean:
 	rm -rf bin 
-	rm cosmic
+	rm domeboy
