@@ -6,6 +6,10 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_memory_editor/imgui_memory_editor.h"
 
+#include "gameboy.h"
+
+void memoryEditor(Memory memory);
+
 int main(){
     
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0){
@@ -51,6 +55,22 @@ int main(){
     glEnable(GL_DEBUG_OUTPUT);
 
     bool done = false;
+    
+
+
+    //Create GB Out Texture. Thanks to @ThePixelCoder for helping me with this. 
+    GLuint gbtex = 0;
+    uint32_t gbdata[160 * 144];
+    glGenTextures(1,&gbtex);
+    glBindTexture(GL_TEXTURE_2D,gbtex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 160, 144, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gbdata);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+    Gameboy gameboy = Gameboy();
 
     while (!done){
         SDL_Event event;
@@ -65,11 +85,38 @@ int main(){
 
 
         ImGui_ImplOpenGL3_NewFrame();
-
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
         ImGui::ShowDemoWindow();
+
+        /** VIDEO OUT **/
+        glBindTexture(GL_TEXTURE_2D,gbtex);
+        glTexSubImage2D(GL_TEXTURE_2D,0,0,0,160,144,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8,gbdata);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        float my_tex_w = (float)160;
+        float my_tex_h = (float)144;
+
+
+        ImVec2 uv_min = ImVec2(0.0f,0.0f);
+        ImVec2 uv_max = ImVec2(1.0f,1.0f);
+        ImVec4 tint_col = ImVec4(1.0f,1.0f,1.0f,1.0f);
+        ImVec4 border_col = ImVec4(1.0f,1.0f,1.0f,1.0f);
+
+        ImGui::SetNextWindowPos(ImVec2(630, 30), ImGuiCond_Once);
+        ImGui::Begin("Gameboy");
+        ImGui::Image((void*)(intptr_t)(gbtex),ImVec2(my_tex_w,my_tex_h), uv_min, uv_max, tint_col, border_col);
+        ImGui::End();
+        /** VIDEO OUT END **/
+
+
+        memoryEditor(gameboy.memory);
+
+
 
         // Rendering
         ImGui::Render();
@@ -94,4 +141,41 @@ int main(){
     SDL_Quit();
 
     return 0;
+}
+
+
+void memoryEditor(Memory memory){
+    static MemoryEditor ROMBank0_Edit;
+    static MemoryEditor ROMBank1_Edit;
+    static MemoryEditor VRAM_Edit;
+    static MemoryEditor ExternRAM_Edit;
+    static MemoryEditor WorkRAM0_Edit;
+    static MemoryEditor WorkRAM1_Edit;
+    static MemoryEditor EchoRAM_edit;
+    static MemoryEditor OAMRAM_edit;
+    static MemoryEditor HRAM_edit;
+    static MemoryEditor IE_Edit;
+
+    ROMBank1_Edit.DrawWindow("asdf",memory.ROMBank1.data(), sizeof(uint8_t)*memory.ROMBank1.size());
+
+    /*
+    ImGui::SetNextWindowSize(ImVec2(530, 280), ImGuiCond_Once);
+    ImGui::Begin("Memory Edit");
+    if(ImGui::BeginTabBar("Memory Editors", 0)){
+
+        if(ImGui::BeginTabItem("ROMBank0")){
+            ImGui::Text("Poo poo");
+            ROMBank0_Edit.DrawContents(memory.ROMBank0.data(), sizeof(uint8_t)*memory.ROMBank0.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("Penis")){
+            ImGui::Text("Weiner");
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
+    ImGui::End();
+    */
+
+    
 }

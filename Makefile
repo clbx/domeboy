@@ -1,5 +1,5 @@
 EXE = domeboy
-SOURCES = main.cpp
+SOURCES = main.cpp gameboy.cpp memory.cpp cpu.cpp
 SOURCES += lib/gl3w/GL/glew.c
 SOURCES += lib/imgui/backend/imgui_impl_sdl.cpp lib/imgui/backend/imgui_impl_opengl3.cpp 
 SOURCES += lib/imgui/imgui.cpp lib/imgui/imgui_demo.cpp lib/imgui/imgui_draw.cpp lib/imgui/imgui_widgets.cpp lib/imgui/imgui_tables.cpp
