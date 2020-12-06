@@ -5,10 +5,21 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_memory_editor/imgui_memory_editor.h"
+#include "imguifs/imguifilesystem.h"
+
+#include <string>
+#include <fstream>
 
 #include "gameboy.h"
 
-void memoryEditor(Memory memory);
+void memoryWindow(Memory *memory);
+void statusWindow(Gameboy *gameboy);
+void topMenu(Memory *memory);
+void videoWindow(Gameboy *gameboy,GLuint gbtex);
+
+
+
+uint32_t gbdata[160 * 144] = {};
 
 int main(){
     
@@ -60,7 +71,6 @@ int main(){
 
     //Create GB Out Texture. Thanks to @ThePixelCoder for helping me with this. 
     GLuint gbtex = 0;
-    uint32_t gbdata[160 * 144];
     glGenTextures(1,&gbtex);
     glBindTexture(GL_TEXTURE_2D,gbtex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 160, 144, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, gbdata);
@@ -81,41 +91,19 @@ int main(){
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
         }
-        
-
-
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
         ImGui::ShowDemoWindow();
-
-        /** VIDEO OUT **/
-        glBindTexture(GL_TEXTURE_2D,gbtex);
-        glTexSubImage2D(GL_TEXTURE_2D,0,0,0,160,144,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8,gbdata);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        float my_tex_w = (float)160;
-        float my_tex_h = (float)144;
+      
 
 
-        ImVec2 uv_min = ImVec2(0.0f,0.0f);
-        ImVec2 uv_max = ImVec2(1.0f,1.0f);
-        ImVec4 tint_col = ImVec4(1.0f,1.0f,1.0f,1.0f);
-        ImVec4 border_col = ImVec4(1.0f,1.0f,1.0f,1.0f);
 
-        ImGui::SetNextWindowPos(ImVec2(630, 30), ImGuiCond_Once);
-        ImGui::Begin("Gameboy");
-        ImGui::Image((void*)(intptr_t)(gbtex),ImVec2(my_tex_w,my_tex_h), uv_min, uv_max, tint_col, border_col);
-        ImGui::End();
-        /** VIDEO OUT END **/
-
-
-        memoryEditor(gameboy.memory);
-
+        videoWindow(&gameboy,gbtex);
+        topMenu(&gameboy.memory);
+        memoryWindow(&gameboy.memory);
+        statusWindow(&gameboy);
 
 
         // Rendering
@@ -144,38 +132,140 @@ int main(){
 }
 
 
-void memoryEditor(Memory memory){
+void videoWindow(Gameboy *gameboy,GLuint gbtex){
+    glBindTexture(GL_TEXTURE_2D,gbtex);
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,160,144,GL_RGBA,GL_UNSIGNED_INT_8_8_8_8,gbdata);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    float my_tex_w = (float)160;
+    float my_tex_h = (float)144;
+
+
+    ImVec2 uv_min = ImVec2(0.0f,0.0f);
+    ImVec2 uv_max = ImVec2(1.0f,1.0f);
+    ImVec4 tint_col = ImVec4(1.0f,1.0f,1.0f,1.0f);
+    ImVec4 border_col = ImVec4(1.0f,1.0f,1.0f,1.0f);
+
+    ImGui::SetNextWindowPos(ImVec2(630, 30), ImGuiCond_Once);
+    ImGui::Begin("Gameboy");
+    ImGui::Image((void*)(intptr_t)(gbtex),ImVec2(my_tex_w,my_tex_h), uv_min, uv_max, tint_col, border_col);
+    ImGui::End();
+}
+
+void statusWindow(Gameboy *gameboy){
+    ImGui::Begin("Processor Status");
+    ImGui::Text("A: %04X",gameboy->cpu.a);
+    ImGui::Text("F: %04X",gameboy->cpu.f);
+    ImGui::Text("");
+    ImGui::Text("B: %04X",gameboy->cpu.b);
+    ImGui::Text("C: %04X",gameboy->cpu.c);
+    ImGui::Text("");
+    ImGui::Text("D: %04X",gameboy->cpu.d);
+    ImGui::Text("E: %04X",gameboy->cpu.e);
+    ImGui::Text("");
+    ImGui::Text("H: %04X",gameboy->cpu.h);
+    ImGui::Text("L: %04X",gameboy->cpu.l);
+    ImGui::End();
+}
+
+void memoryWindow(Memory *memory){
+    ImGui::SetNextWindowSize(ImVec2(530, 280), ImGuiCond_Once);
     static MemoryEditor ROMBank0_Edit;
     static MemoryEditor ROMBank1_Edit;
     static MemoryEditor VRAM_Edit;
     static MemoryEditor ExternRAM_Edit;
     static MemoryEditor WorkRAM0_Edit;
     static MemoryEditor WorkRAM1_Edit;
-    static MemoryEditor EchoRAM_edit;
-    static MemoryEditor OAMRAM_edit;
-    static MemoryEditor HRAM_edit;
-    static MemoryEditor IE_Edit;
-
-    ROMBank1_Edit.DrawWindow("asdf",memory.ROMBank1.data(), sizeof(uint8_t)*memory.ROMBank1.size());
-
-    /*
-    ImGui::SetNextWindowSize(ImVec2(530, 280), ImGuiCond_Once);
+    static MemoryEditor EchoRAM_Edit;
+    static MemoryEditor OAMRAM_Edit;
+    static MemoryEditor HRAM_Edit;
     ImGui::Begin("Memory Edit");
     if(ImGui::BeginTabBar("Memory Editors", 0)){
 
-        if(ImGui::BeginTabItem("ROMBank0")){
-            ImGui::Text("Poo poo");
-            ROMBank0_Edit.DrawContents(memory.ROMBank0.data(), sizeof(uint8_t)*memory.ROMBank0.size());
+        if(ImGui::BeginTabItem("ROM Bank 0")){
+            ROMBank0_Edit.DrawContents(memory->ROMBank0.data(), sizeof(uint8_t)*memory->ROMBank0.size());
             ImGui::EndTabItem();
         }
-        if(ImGui::BeginTabItem("Penis")){
-            ImGui::Text("Weiner");
+        if(ImGui::BeginTabItem("ROM Bank 1")){
+            ROMBank1_Edit.DrawContents(memory->ROMBank1.data(), sizeof(uint8_t)*memory->ROMBank1.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("VRAM")){
+            VRAM_Edit.DrawContents(memory->VRAM.data(), sizeof(uint8_t)*memory->VRAM.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("External RAM")){
+            ExternRAM_Edit.DrawContents(memory->ExternRAM.data(), sizeof(uint8_t)*memory->ExternRAM.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("Work RAM 0")){
+            WorkRAM0_Edit.DrawContents(memory->WorkRAM0.data(), sizeof(uint8_t)*memory->WorkRAM0.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("Work RAM 1")){
+            WorkRAM1_Edit.DrawContents(memory->WorkRAM1.data(), sizeof(uint8_t)*memory->WorkRAM1.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("Echo RAM")){
+            EchoRAM_Edit.DrawContents(memory->EchoRAM.data(), sizeof(uint8_t)*memory->EchoRAM.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("OAM RAM")){
+            OAMRAM_Edit.DrawContents(memory->OAMRAM.data(), sizeof(uint8_t)*memory->OAMRAM.size());
+            ImGui::EndTabItem();
+        }
+        if(ImGui::BeginTabItem("High RAM")){
+            HRAM_Edit.DrawContents(memory->HRAM.data(), sizeof(uint8_t)*memory->HRAM.size());
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
     }
     ImGui::End();
-    */
+}
 
-    
+void topMenu(Memory *memory){
+    std::string menu_action = "";
+        if (ImGui::BeginMainMenuBar()){
+            if (ImGui::BeginMenu("File")){
+                if (ImGui::MenuItem("Load ROM")){
+                    menu_action="loadrom";
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
+
+        if(menu_action == "loadrom"){
+            ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_Once);
+            ImGui::OpenPopup("LoadROM");
+        }
+
+        if (ImGui::BeginPopupModal("LoadROM", NULL)){
+            ImGui::Text("Choose File: ");
+            static char loadBinFilepath[128] = "";
+            ImGui::PushItemWidth(400);
+            ImGui::InputText("", loadBinFilepath, IM_ARRAYSIZE(loadBinFilepath));
+            ImGui::SameLine();
+            const bool browseBinButtonPressed = ImGui::Button("...");
+            static ImGuiFs::Dialog loadbinFsInstance;
+            loadbinFsInstance.chooseFileDialog(browseBinButtonPressed,"./");
+            strcpy(loadBinFilepath,loadbinFsInstance.getChosenPath()); //TODO: https://i.imgur.com/xZrKmAS.jpg
+            if (strlen(loadBinFilepath)>0) {
+            }
+           if (ImGui::Button("Open")){
+                std::ifstream File;
+                File.open(loadBinFilepath);
+                File.read((char *)memory->ROMBank0.data(), 0x4000);
+                File.close();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel")){
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
 }

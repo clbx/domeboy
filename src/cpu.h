@@ -15,10 +15,6 @@
 
 class CPU {
     private:
-        uint8_t r[8]; //General Registers
-        uint16_t pc;  //Program Counter
-        uint16_t sp;  //Stack Pointer
-        uint8_t st;   //Flag Register
 
         Memory mem;
 
@@ -31,6 +27,22 @@ class CPU {
             int cycles;
             void* op; 
         };
+
+        uint16_t pc;  //Program Counter
+        uint16_t sp;  //Stack Pointer
+        uint8_t st;   //Flag Register
+
+        uint8_t a;
+        uint8_t f;
+
+        uint8_t b;
+        uint8_t c;
+        
+        uint8_t d;
+        uint8_t e;
+        
+        uint8_t h;
+        uint8_t l;
 
         CPU();
         CPU(Memory);
