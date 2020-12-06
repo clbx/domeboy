@@ -16,7 +16,7 @@
 class CPU {
     private:
 
-        Memory memory;
+        Memory *memory;
 
         typedef void(CPU::*Opcode)();
 
@@ -56,7 +56,7 @@ class CPU {
         uint8_t l;
 
         CPU();
-        CPU(Memory);
+        CPU(Memory*);
 
         void step();
         

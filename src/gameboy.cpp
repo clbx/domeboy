@@ -2,7 +2,7 @@
 
 Gameboy::Gameboy(){
     memory = Memory();
-    cpu = CPU(memory);
+    cpu = CPU(&memory);
 }
 
 

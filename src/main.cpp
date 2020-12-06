@@ -9,10 +9,11 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
 
 #include "gameboy.h"
 
-void memoryWindow(Memory *memory);
+void memoryWindow(Gameboy *gameboy);
 void statusWindow(Gameboy *gameboy);
 void topMenu(Memory *memory);
 void videoWindow(Gameboy *gameboy,GLuint gbtex);
@@ -101,7 +102,7 @@ int main(){
         controlWindow(&gameboy);
         videoWindow(&gameboy,gbtex);
         topMenu(&gameboy.memory);
-        memoryWindow(&gameboy.memory);
+        memoryWindow(&gameboy);
         statusWindow(&gameboy);
         /** END GUI **/
 
@@ -143,6 +144,12 @@ void controlWindow(Gameboy *gameboy){
     if(ImGui::Button("Step")){
         gameboy->Step();
     }
+
+
+    if(ImGui::Button("Write")){
+        gameboy->memory.write(0x0000,0x01);     
+    }
+
     ImGui::End();
 }
 
@@ -185,7 +192,7 @@ void statusWindow(Gameboy *gameboy){
     ImGui::End();
 }
 
-void memoryWindow(Memory *memory){
+void memoryWindow(Gameboy *gameboy){
     ImGui::SetNextWindowSize(ImVec2(530, 280), ImGuiCond_Once);
     static MemoryEditor ROMBank0_Edit;
     static MemoryEditor ROMBank1_Edit;
@@ -200,7 +207,7 @@ void memoryWindow(Memory *memory){
     if(ImGui::BeginTabBar("Memory Editors", 0)){
 
         if(ImGui::BeginTabItem("ROM Bank 0")){
-            ROMBank0_Edit.DrawContents(memory->ROMBank0, sizeof(memory->ROMBank0));
+            ROMBank0_Edit.DrawContents(gameboy->memory.ROMBank0, sizeof(gameboy->memory.ROMBank0));
             ImGui::EndTabItem();
         }
         /*

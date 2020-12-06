@@ -48,6 +48,7 @@ uint8_t Memory::read(uint16_t addr){
 }
 
 void Memory::write(uint16_t addr, uint8_t data){
+    printf("Writing %02X to %04X\n",data,addr);
     if(addr == 0xFFFF){IE = data;}
     if(addr >= 0xFF80){HRAM[addr-0xFF80] = data;}
     if(addr >= 0xFE00){OAMRAM[addr-0xF300] = data;}

@@ -1,9 +1,10 @@
 #include "cpu.h"
 
 
-CPU::CPU(){}
+CPU::CPU(){
+}
 
-CPU::CPU(Memory memory){
+CPU::CPU(Memory *memory){
     this->memory = memory;
 
     //Set all instructions to undefined
@@ -16,16 +17,16 @@ CPU::CPU(Memory memory){
 }
 
 void CPU::step(){
-    uint8_t opcode = memory.read(pc);                          //Fetch
+    uint8_t opcode = memory->read(pc);                          //Fetch
     Instruction currentInstruction = InstructionSet[opcode];   //Decode
-    (this->*currentInstruction.op)();                                 //Execute
+    (this->*currentInstruction.op)();                          //Execute
     pc += currentInstruction.bytes;
 };
 
 
 
 void CPU::Undefined(){
-    printf("!!! Unimplemented Opcode [%02X] @ %04X !!!\n",this->memory.read(this->pc),pc);
+    printf("!!! Unimplemented Opcode [%02X] @ %04X !!!\n",this->memory->read(this->pc),pc);
 }
 
 
