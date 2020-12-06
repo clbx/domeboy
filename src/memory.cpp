@@ -5,29 +5,46 @@ Memory::Memory(){
 }
 
 void Memory::reset(){
-    ROMBank0.fill(0x00);  
-    ROMBank1.fill(0x00);  
-    VRAM.fill(0x00);;    
-    ExternRAM.fill(0x00);
-    WorkRAM0.fill(0x00); 
-    WorkRAM1.fill(0x00); 
-    EchoRAM.fill(0x00);  
-    OAMRAM.fill(0x00);   
-    HRAM.fill(0x00);    
-    IE = 0x00;                   
+    memset(ROMBank0,0,sizeof(ROMBank0));
+    memset(ROMBank1,0,sizeof(ROMBank1));
+    memset(VRAM,0,sizeof(VRAM));
+    memset(ExternRAM,0,sizeof(ExternRAM));
+    memset(WorkRAM0,0,sizeof(WorkRAM0));
+    memset(WorkRAM1,0,sizeof(WorkRAM1));
+    memset(EchoRAM,0,sizeof(EchoRAM));
+    memset(OAMRAM,0,sizeof(OAMRAM));
+    memset(HRAM,0,sizeof(HRAM));
+    IE = 0;
 }
 
 uint8_t Memory::read(uint16_t addr){
-    if(addr == 0xFFFF){return IE;}
-    if(addr >= 0xFF80){return HRAM[addr-0xFF80];}
-    if(addr >= 0xFE00){return OAMRAM[addr-0xF300];}
-    if(addr >= 0xE000){return EchoRAM[addr-0x3000];}
-    if(addr >= 0xD000){return WorkRAM1[addr-0xD000];}
-    if(addr >= 0xC000){return WorkRAM0[addr-0xC000];}
-    if(addr >= 0xA000){return ExternRAM[addr-0xA000];}
-    if(addr >= 0x8000){return VRAM[addr-0x8000];}
-    if(addr >= 0x4000){return ROMBank1[addr-0x4000];}
-    else{return ROMBank0[addr];}
+    printf("Reading Memory from %04X\n",addr);
+    if(addr == 0xFFFF){
+        return IE;}
+    if(addr >= 0xFF80){
+        return HRAM[addr-0xFF80];}
+    if(addr >= 0xFE00){
+        return OAMRAM[addr-0xF300];}
+    if(addr >= 0xE000){
+        return EchoRAM[addr-0x3000];}
+    if(addr >= 0xD000){
+        return WorkRAM1[addr-0xD000];}
+    if(addr >= 0xC000){
+        return WorkRAM0[addr-0xC000];}
+    if(addr >= 0xA000){
+        return ExternRAM[addr-0xA000];}
+    if(addr >= 0x8000){
+        return VRAM[addr-0x8000];}
+    if(addr >= 0x4000){
+        printf("Resolves to ROMBank1\n");
+        return ROMBank1[addr-0x4000];
+    }
+    else{
+        printf("Resolves to ROMBank0\n");
+        printf("\n");
+
+        return ROMBank0[addr];
+    }
 }
 
 void Memory::write(uint16_t addr, uint8_t data){

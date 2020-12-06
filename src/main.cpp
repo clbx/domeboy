@@ -16,7 +16,7 @@ void memoryWindow(Memory *memory);
 void statusWindow(Gameboy *gameboy);
 void topMenu(Memory *memory);
 void videoWindow(Gameboy *gameboy,GLuint gbtex);
-
+void controlWindow(Gameboy *gameboy);
 
 
 uint32_t gbdata[160 * 144] = {};
@@ -95,16 +95,15 @@ int main(){
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
 
+
+        /** GUI **/
         ImGui::ShowDemoWindow();
-      
-
-
-
+        controlWindow(&gameboy);
         videoWindow(&gameboy,gbtex);
         topMenu(&gameboy.memory);
         memoryWindow(&gameboy.memory);
         statusWindow(&gameboy);
-
+        /** END GUI **/
 
         // Rendering
         ImGui::Render();
@@ -116,10 +115,6 @@ int main(){
         SDL_GL_SwapWindow(window);
 
     }
-
-
-
-
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -131,6 +126,25 @@ int main(){
     return 0;
 }
 
+
+void controlWindow(Gameboy *gameboy){
+    ImGui::Begin("Control");
+    if(gameboy->running){
+        if(ImGui::Button("Stop")){
+            gameboy->running = false;
+        }
+    }
+    else{
+        if(ImGui::Button("Start")){
+            gameboy->Run();
+        }
+    }
+    ImGui::SameLine();
+    if(ImGui::Button("Step")){
+        gameboy->Step();
+    }
+    ImGui::End();
+}
 
 void videoWindow(Gameboy *gameboy,GLuint gbtex){
     glBindTexture(GL_TEXTURE_2D,gbtex);
@@ -186,41 +200,43 @@ void memoryWindow(Memory *memory){
     if(ImGui::BeginTabBar("Memory Editors", 0)){
 
         if(ImGui::BeginTabItem("ROM Bank 0")){
-            ROMBank0_Edit.DrawContents(memory->ROMBank0.data(), sizeof(uint8_t)*memory->ROMBank0.size());
+            ROMBank0_Edit.DrawContents(memory->ROMBank0, sizeof(memory->ROMBank0));
             ImGui::EndTabItem();
         }
+        /*
         if(ImGui::BeginTabItem("ROM Bank 1")){
-            ROMBank1_Edit.DrawContents(memory->ROMBank1.data(), sizeof(uint8_t)*memory->ROMBank1.size());
+            ROMBank1_Edit.DrawContents(memory.ROMBank1.data(), sizeof(uint8_t)*memory.ROMBank1.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("VRAM")){
-            VRAM_Edit.DrawContents(memory->VRAM.data(), sizeof(uint8_t)*memory->VRAM.size());
+            VRAM_Edit.DrawContents(memory.VRAM.data(), sizeof(uint8_t)*memory.VRAM.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("External RAM")){
-            ExternRAM_Edit.DrawContents(memory->ExternRAM.data(), sizeof(uint8_t)*memory->ExternRAM.size());
+            ExternRAM_Edit.DrawContents(memory.ExternRAM.data(), sizeof(uint8_t)*memory.ExternRAM.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("Work RAM 0")){
-            WorkRAM0_Edit.DrawContents(memory->WorkRAM0.data(), sizeof(uint8_t)*memory->WorkRAM0.size());
+            WorkRAM0_Edit.DrawContents(memory.WorkRAM0.data(), sizeof(uint8_t)*memory.WorkRAM0.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("Work RAM 1")){
-            WorkRAM1_Edit.DrawContents(memory->WorkRAM1.data(), sizeof(uint8_t)*memory->WorkRAM1.size());
+            WorkRAM1_Edit.DrawContents(memory.WorkRAM1.data(), sizeof(uint8_t)*memory.WorkRAM1.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("Echo RAM")){
-            EchoRAM_Edit.DrawContents(memory->EchoRAM.data(), sizeof(uint8_t)*memory->EchoRAM.size());
+            EchoRAM_Edit.DrawContents(memory.EchoRAM.data(), sizeof(uint8_t)*memory.EchoRAM.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("OAM RAM")){
-            OAMRAM_Edit.DrawContents(memory->OAMRAM.data(), sizeof(uint8_t)*memory->OAMRAM.size());
+            OAMRAM_Edit.DrawContents(memory.OAMRAM.data(), sizeof(uint8_t)*memory.OAMRAM.size());
             ImGui::EndTabItem();
         }
         if(ImGui::BeginTabItem("High RAM")){
-            HRAM_Edit.DrawContents(memory->HRAM.data(), sizeof(uint8_t)*memory->HRAM.size());
+            HRAM_Edit.DrawContents(memory.HRAM.data(), sizeof(uint8_t)*memory.HRAM.size());
             ImGui::EndTabItem();
         }
+        */
         ImGui::EndTabBar();
     }
     ImGui::End();
@@ -242,7 +258,7 @@ void topMenu(Memory *memory){
             ImGui::SetNextWindowSize(ImVec2(500, 100), ImGuiCond_Once);
             ImGui::OpenPopup("LoadROM");
         }
-
+        // CHANGE TO PFD //
         if (ImGui::BeginPopupModal("LoadROM", NULL)){
             ImGui::Text("Choose File: ");
             static char loadBinFilepath[128] = "";
@@ -252,13 +268,13 @@ void topMenu(Memory *memory){
             const bool browseBinButtonPressed = ImGui::Button("...");
             static ImGuiFs::Dialog loadbinFsInstance;
             loadbinFsInstance.chooseFileDialog(browseBinButtonPressed,"./");
-            strcpy(loadBinFilepath,loadbinFsInstance.getChosenPath()); //TODO: https://i.imgur.com/xZrKmAS.jpg
+            strcpy(loadBinFilepath,loadbinFsInstance.getChosenPath());
             if (strlen(loadBinFilepath)>0) {
             }
            if (ImGui::Button("Open")){
                 std::ifstream File;
                 File.open(loadBinFilepath);
-                File.read((char *)memory->ROMBank0.data(), 0x4000);
+                File.read((char *)memory->ROMBank0, 0x4000);
                 File.close();
                 ImGui::CloseCurrentPopup();
             }

@@ -16,17 +16,28 @@
 class CPU {
     private:
 
-        Memory mem;
+        Memory memory;
 
-
-    public:
+        typedef void(CPU::*Opcode)();
 
         struct Instruction{
             const char* mnemonic;
             int bytes;
             int cycles;
-            void* op; 
+            Opcode op; 
         };
+
+        Instruction InstructionSet[256];
+
+
+        void Undefined();
+
+        void execute(Instruction instruction);
+
+
+    public:
+
+        
 
         uint16_t pc;  //Program Counter
         uint16_t sp;  //Stack Pointer
@@ -46,6 +57,9 @@ class CPU {
 
         CPU();
         CPU(Memory);
+
+        void step();
+        
 
 
 

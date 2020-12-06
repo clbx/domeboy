@@ -9,7 +9,9 @@
  */
 
 #include <stdint.h>
-#include <array>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 
 class Memory {
@@ -19,17 +21,17 @@ class Memory {
          * Memory is Set up like this to make it easy to manage for debugging and such.
          * Read and Write Functions handle making sure all memory goes to the correct position
          */
-        std::array<uint8_t, 0x4000> ROMBank0;  /// 16KB 0x0000 - 0x3FFF: In Cart, Fixed at Bank 00 
-        std::array<uint8_t, 0x4000> ROMBank1;  /// 16KB 0x4000 - 0x7FFF: In Cart, Switchable in CGB
-        std::array<uint8_t, 0x2000> VRAM;      ///  8KB 0x8000 - 0x9FFF: VRAM
-        std::array<uint8_t, 0x2000> ExternRAM; ///  8KB 0xA000 - 0xBFFF: In Cart, External RAM
-        std::array<uint8_t, 0x1000> WorkRAM0;  ///  4KB 0xC000 - 0xCFFF: Work Ram 0 
-        std::array<uint8_t, 0x1000> WorkRAM1;  ///  4KB 0xD000 - 0xDFFF: Work Ram 1, Switchable in CGB
-        std::array<uint8_t, 0x1E00> EchoRAM;   ///  7KB 0xE000 - 0xFDFF: Mirror of 0xC000 - 0xDDFF, Typically not used
-        std::array<uint8_t, 0x00A0> OAMRAM;    /// 160B 0xFE00 - 0xFE9F: Sprite Table
-        //96B 0xFEA0 - 0xFEFF: Not Usable      
-        std::array<uint8_t, 0x007E> HRAM;      /// 126B 0xFF80 - 0xFFFE: High RAM
-        uint8_t IE;                            ///   1B 0xFFFF - 0xFFFF: Interrupts Enable Register
+        uint8_t ROMBank0[0x4000];  /// 16KB 0x0000 - 0x3FFF: In Cart, Fixed at Bank 00 
+        uint8_t ROMBank1[0x4000];  /// 16KB 0x4000 - 0x7FFF: In Cart, Switchable in CGB
+        uint8_t VRAM[0x2000];      ///  8KB 0x8000 - 0x9FFF: VRAM
+        uint8_t ExternRAM[0x2000]; ///  8KB 0xA000 - 0xBFFF: In Cart, External RAM
+        uint8_t WorkRAM0[0x1000];  ///  4KB 0xC000 - 0xCFFF: Work Ram 0 
+        uint8_t WorkRAM1[0x1000];  ///  4KB 0xD000 - 0xDFFF: Work Ram 1, Switchable in CGB
+        uint8_t EchoRAM[0x1E00];   ///  7KB 0xE000 - 0xFDFF: Mirror of 0xC000 - 0xDDFF, Typically not used
+        uint8_t OAMRAM[0xA0];      /// 160B 0xFE00 - 0xFE9F: Sprite Table
+                                   ///  96B 0xFEA0 - 0xFEFF: Not Usable      
+        uint8_t HRAM[0x7E];        /// 126B 0xFF80 - 0xFFFE: High RAM
+        uint8_t IE;                ///   1B 0xFFFF - 0xFFFF: Interrupts Enable Register
 
 
         Memory();
