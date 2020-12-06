@@ -16,6 +16,8 @@
 class CPU {
     private:
 
+        Logger logger;
+
         Memory *memory;
 
         typedef void(CPU::*Opcode)();
@@ -56,7 +58,7 @@ class CPU {
         uint8_t l;
 
         CPU();
-        CPU(Memory*);
+        CPU(Memory*,Logger);
 
         void step();
         

@@ -6,6 +6,7 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_memory_editor/imgui_memory_editor.h"
 #include "imguifs/imguifilesystem.h"
+#include "imgui_logger.h"
 
 #include <string>
 #include <fstream>
@@ -13,6 +14,9 @@
 
 #include "gameboy.h"
 
+static Logger debugLog;
+
+void debugWindow();
 void memoryWindow(Gameboy *gameboy);
 void statusWindow(Gameboy *gameboy);
 void topMenu(Memory *memory);
@@ -81,7 +85,7 @@ int main(){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 
-    Gameboy gameboy = Gameboy();
+    Gameboy gameboy = Gameboy(&debugLog);
 
     while (!done){
         SDL_Event event;
@@ -104,6 +108,7 @@ int main(){
         topMenu(&gameboy.memory);
         memoryWindow(&gameboy);
         statusWindow(&gameboy);
+        debugWindow();
         /** END GUI **/
 
         // Rendering
@@ -145,12 +150,11 @@ void controlWindow(Gameboy *gameboy){
         gameboy->Step();
     }
 
-
-    if(ImGui::Button("Write")){
-        gameboy->memory.write(0x0000,0x01);     
-    }
-
     ImGui::End();
+}
+
+void debugWindow(){
+    debugLog.Draw("Debug Log");
 }
 
 void videoWindow(Gameboy *gameboy,GLuint gbtex){

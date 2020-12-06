@@ -13,6 +13,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "imgui_logger.h"
+
 
 class Memory {
     public:
@@ -33,8 +35,11 @@ class Memory {
         uint8_t HRAM[0x7E];        /// 126B 0xFF80 - 0xFFFE: High RAM
         uint8_t IE;                ///   1B 0xFFFF - 0xFFFF: Interrupts Enable Register
 
+        Logger logger;
 
         Memory();
+
+        Memory(Logger);
         void reset();
         uint8_t read(uint16_t);
         void write(uint16_t, uint8_t);

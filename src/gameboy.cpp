@@ -1,8 +1,10 @@
 #include "gameboy.h"
 
-Gameboy::Gameboy(){
-    memory = Memory();
-    cpu = CPU(&memory);
+
+Gameboy::Gameboy(Logger logger){
+    this->logger = logger;
+    memory = Memory(logger);
+    cpu = CPU(&memory,logger);
 }
 
 
