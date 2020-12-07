@@ -16,7 +16,6 @@
 class CPU {
     private:
 
-        Logger logger;
 
         Memory *memory;
 
@@ -58,7 +57,7 @@ class CPU {
         uint8_t l;
 
         CPU();
-        CPU(Memory*,Logger);
+        CPU(Memory*);
 
         void step();
         

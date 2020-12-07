@@ -1,11 +1,8 @@
 #include "memory.h"
 
-Memory::Memory(Logger logger){
-    this->logger = logger;
+Memory::Memory(){
     reset();
 }
-
-Memory::Memory(){}
 
 
 void Memory::reset(){
@@ -40,11 +37,9 @@ uint8_t Memory::read(uint16_t addr){
     if(addr >= 0x8000){
         return VRAM[addr-0x8000];}
     if(addr >= 0x4000){
-        logger.AddLog("Resolves to ROMBank1\n");
         return ROMBank1[addr-0x4000];
     }
     else{
-        logger.AddLog("Resolves to ROMBank0\n");
         printf("\n");
 
         return ROMBank0[addr];

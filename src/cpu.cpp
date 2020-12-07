@@ -4,9 +4,8 @@
 CPU::CPU(){
 }
 
-CPU::CPU(Memory *memory, Logger *logger){
+CPU::CPU(Memory *memory){
     this->memory = memory;
-    this->logger = *logger;
 
     //Set all instructions to undefined
     for(int i = 0; i < 256; i++){
