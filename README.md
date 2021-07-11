@@ -1,3 +1,3 @@
 # Domeboy
 
-A cycle accurate gameboy emulator. WIP
+worlds worst gameboy emulator
