@@ -1,6 +1,1 @@
-/bin
-domeboy
-imgui.ini
-/.vscode
-/rom
-/.DS_Store
+/target
